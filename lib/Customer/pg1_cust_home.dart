@@ -16,6 +16,7 @@ class ShopListScreen extends StatefulWidget {
 class _ShopListScreenState extends State<ShopListScreen> {
   List<Shop> shops = [];
   bool isLoading = true;
+  String? errorMessage; // To store error messages
   final Dio _dio = Dio();
 
   @override
@@ -26,18 +27,25 @@ class _ShopListScreenState extends State<ShopListScreen> {
 
   Future<void> fetchShops() async {
     try {
-      var response = await _dio.get('http://localhost:5000/api/Customer/getallprod');
+      var response =
+          await _dio.get('http://localhost:5000/api/Customer/getallprod');
 
-      setState(() {
-        shops = (response.data as List)
-            .map((json) => Shop.fromJson(json))
-            .toList();
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          shops = (response.data as List)
+              .map((json) => Shop.fromJson(json))
+              .toList();
+          isLoading = false;
+          errorMessage = null; // Clear any previous error messages
+        });
+      }
     } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+          errorMessage = 'Failed to load shops. Please try again later.';
+        });
+      }
       print('Error: $e');
     }
   }
@@ -47,7 +55,7 @@ class _ShopListScreenState extends State<ShopListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Shop List',
+          'CLUSTER',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
         ),
         centerTitle: true,
@@ -55,24 +63,30 @@ class _ShopListScreenState extends State<ShopListScreen> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: isLoading
-            ? _buildShimmerEffect() // Show shimmer while loading
-            : shops.isEmpty
-                ? const Center(child: Text("No shops available"))
-                : GridView.builder(
-                    itemCount: shops.length,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2, // Two shops per row
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                      childAspectRatio: 0.8, // Adjust card aspect ratio
-                    ),
-                    itemBuilder: (context, index) {
-                      return _buildShopCard(shops[index]);
-                    },
-                  ),
+      body: Container(
+        color: Colors.grey[200], // Set background color to light gray
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: isLoading
+              ? _buildShimmerEffect() // Show shimmer while loading
+              : errorMessage != null
+                  ? Center(child: Text(errorMessage!)) // Show error message
+                  : shops.isEmpty
+                      ? const Center(child: Text("No shops available"))
+                      : GridView.builder(
+                          itemCount: shops.length,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2, // Two shops per row
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 10,
+                            childAspectRatio: 0.8, // Adjust card aspect ratio
+                          ),
+                          itemBuilder: (context, index) {
+                            return _buildShopCard(shops[index]);
+                          },
+                        ),
+        ),
       ),
     );
   }
@@ -102,7 +116,7 @@ class _ShopListScreenState extends State<ShopListScreen> {
     );
   }
 
-  // Shop Card with Animations
+  // Shop Card with Animations - Modified to place text below the card
   Widget _buildShopCard(Shop shop) {
     return GestureDetector(
       onTap: () {
@@ -117,54 +131,61 @@ class _ShopListScreenState extends State<ShopListScreen> {
           ),
         );
       },
-      child: Hero(
-        tag: shop.name,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                spreadRadius: 2,
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(15),
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: shop.image != null
-                      ? Image.memory(
-                          shop.image!,
-                          fit: BoxFit.cover,
-                        )
-                      : Image.asset(
-                          'assets/placeholder.png',
-                          fit: BoxFit.cover,
-                        ),
-                ),
-                Container(
-                  color: Colors.black.withOpacity(0.3),
-                  alignment: Alignment.bottomCenter,
-                  padding: const EdgeInsets.all(10),
-                  child: Text(
-                    shop.name,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: Hero(
+              tag: shop.name +
+                  (shop.image?.hashCode.toString() ?? ''), // Ensure unique tag
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      spreadRadius: 2,
                     ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: shop.image != null
+                            ? Image.memory(
+                                shop.image!,
+                                fit: BoxFit.cover,
+                              )
+                            : Image.asset(
+                                'assets/placeholder.png',
+                                fit: BoxFit.cover,
+                              ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
-        ),
+          const SizedBox(height: 8), // Add some spacing between card and text
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: Text(
+              shop.name,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

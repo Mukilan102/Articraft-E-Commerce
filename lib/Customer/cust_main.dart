@@ -13,9 +13,10 @@ class CustomerHome extends StatefulWidget {
 
 class _CustomerHomeState extends State<CustomerHome> {
   int pageIndex = 0;
-  
+
   // Use a separate Navigator key for page content
-  final GlobalKey<NavigatorState> _pageNavigatorKey = GlobalKey<NavigatorState>();
+  final GlobalKey<NavigatorState> _pageNavigatorKey =
+      GlobalKey<NavigatorState>();
 
   Widget _getPage(int index) {
     switch (index) {
@@ -28,16 +29,29 @@ class _CustomerHomeState extends State<CustomerHome> {
       case 3:
         return CustSplashScreen();
       default:
-        return ShopListScreen();
+        // Handle invalid pageIndex gracefully
+        return const Center(child: Text("Page not found"));
     }
+  }
+
+  void _navigateToPage(int index) {
+    setState(() {
+      pageIndex = index;
+    });
+
+    // Pop all routes and push the new one
+    _pageNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+    _pageNavigatorKey.currentState?.pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => _getPage(index),
+        settings: RouteSettings(name: '/$index'),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.search))],
-      ),
       body: WillPopScope(
         onWillPop: () async {
           // Handle back button - try to pop current page navigator first
@@ -77,23 +91,13 @@ class _CustomerHomeState extends State<CustomerHome> {
               _pageNavigatorKey.currentState?.pop();
             }
           } else {
-            // Change tab and replace current route
-            setState(() {
-              pageIndex = index;
-            });
-            
-            // Pop all routes and push the new one
-            _pageNavigatorKey.currentState?.popUntil((route) => route.isFirst);
-            _pageNavigatorKey.currentState?.pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => _getPage(index),
-                settings: RouteSettings(name: '/$index'),
-              ),
-            );
+            _navigateToPage(index);
           }
         },
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.grey,
+        backgroundColor:
+            Colors.white, // Changed bottom navigation bar color to white
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.house), label: "Home"),
           BottomNavigationBarItem(

@@ -55,78 +55,82 @@ class _ProductListScreenState extends State<ProductListScreen> {
         elevation: 0,
         iconTheme: IconThemeData(color: Colors.black),
       ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              padding: EdgeInsets.all(10),
-              itemCount: products.length,
-              itemBuilder: (context, index) {
-                final product = products[index];
-
-                return Card(
-                  margin: EdgeInsets.only(bottom: 10),
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: ListTile(
-                    contentPadding: EdgeInsets.all(10),
-                    leading: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: product.imageBase64 != null
-                          ? Image.memory(
-                              product.imageBase64!,
-                              width: 80,
-                              height: 80,
-                              fit: BoxFit.cover,
-                            )
-                          : Image.asset(
-                              'assets/placeholder.png',
-                              width: 80,
-                              height: 80,
-                              fit: BoxFit.cover,
-                            ),
+      body: Container(
+        color: Colors.grey[200],
+        child: isLoading
+            ? Center(child: CircularProgressIndicator())
+            : ListView.builder(
+                padding: EdgeInsets.all(10),
+                itemCount: products.length,
+                itemBuilder: (context, index) {
+                  final product = products[index];
+        
+                  return Card(
+                    color: Colors.white,
+                    margin: EdgeInsets.only(bottom: 10),
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
                     ),
-                    title: Text(
-                      product.name,
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 4),
-                        Text(
-                          product.description,
-                          style:
-                              TextStyle(color: Colors.grey[600], fontSize: 12),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(height: 6),
-                        Text(
-                          '\$${product.price.toStringAsFixed(2)}',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, color: Colors.green),
-                        ),
-                      ],
-                    ),
-                    trailing: Icon(Icons.arrow_forward_ios,
-                        size: 16, color: Colors.grey),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ProductDetailScreen(
-                            productId: product.id,
+                    child: ListTile(
+                      contentPadding: EdgeInsets.all(10),
+                      leading: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: product.imageBase64 != null
+                            ? Image.memory(
+                                product.imageBase64!,
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                              )
+                            : Image.asset(
+                                'assets/placeholder.png',
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                              ),
+                      ),
+                      title: Text(
+                        product.name,
+                        style:
+                            TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 4),
+                          Text(
+                            product.description,
+                            style:
+                                TextStyle(color: Colors.grey[600], fontSize: 12),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
+                          SizedBox(height: 6),
+                          Text(
+                            '\$${product.price.toStringAsFixed(2)}',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, color: Colors.green),
+                          ),
+                        ],
+                      ),
+                      trailing: Icon(Icons.arrow_forward_ios,
+                          size: 16, color: Colors.grey),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProductDetailScreen(
+                              productId: product.id,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+      ),
     );
   }
 }
