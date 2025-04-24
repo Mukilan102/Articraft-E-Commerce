@@ -72,17 +72,17 @@ class DioClient {
   }
 
   Future<Response> register(String username,String password,String confirmPassword,String email,String mobile,
-  String shopname, String description, String location, String base64Image) async {
-    return await _dio.post('/vendor/register', data: {
-    'username': username,
-    'mobileno': mobile,
-    'email': email,
-    'password': password,
-    'confirmpassword': confirmPassword,
-    'shopname':shopname,
-    'description':description,
-    'location':location,
-    'image':base64Image
-  });
-}
+    String shopname, String description, String location, String base64Image) async {
+      return await _dio.post('/vendor/register', data: {
+      'userName': username,
+      'mobileNo': mobile,
+      'email': email,
+      'password': password,
+      'confirmPassword': confirmPassword,
+      'shopName':shopname,
+      'description':description,
+      'location':location,
+      'image':base64Image
+    });
+  }
 }

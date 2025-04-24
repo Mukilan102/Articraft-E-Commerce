@@ -44,26 +44,28 @@ class _ItemListScreenState extends State<ItemListScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Product List',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 0,
-        iconTheme: IconThemeData(color: Colors.black),
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
               itemCount: items.length,
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               itemBuilder: (context, index) {
                 final item = items[index];
                 final name = item['name'];
                 final description = item['description'];
                 final price = item['price'];
                 final imageBase64 = item['imageBase64'];
+                final dispercentage = item['dispercentage'];
+                final disamount = item['disamount'];
 
                 // Decode Base64 Image
                 Uint8List? imageBytes;
@@ -71,14 +73,28 @@ class _ItemListScreenState extends State<ItemListScreen> {
                   imageBytes = Base64Decoder().convert(imageBase64);
                 }
 
+                // Calculate Discounted Amount and Percentage
+                double? discountedAmount;
+                double? discountedPercentage;
+
+                if (dispercentage != null) {
+                  // Calculate discounted amount using percentage
+                  discountedAmount = price - (price * dispercentage / 100);
+                  discountedPercentage = dispercentage;
+                } else if (disamount != null) {
+                  // Calculate discounted percentage using amount
+                  discountedAmount = price - disamount;
+                  discountedPercentage = (disamount / price) * 100;
+                }
+
                 return Card(
                   elevation: 4,
-                  margin: EdgeInsets.symmetric(vertical: 10),
+                  margin: const EdgeInsets.symmetric(vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: Padding(
-                    padding: EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(10),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -95,22 +111,22 @@ class _ItemListScreenState extends State<ItemListScreen> {
                                   width: 100,
                                   height: 100,
                                   color: Colors.grey[300],
-                                  child: Icon(Icons.image,
+                                  child: const Icon(Icons.image,
                                       size: 50, color: Colors.white),
                                 ),
                         ),
-                        SizedBox(width: 15),
+                        const SizedBox(width: 15),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 name,
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 18),
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              SizedBox(height: 5),
+                              const SizedBox(height: 5),
                               Text(
                                 description,
                                 style: TextStyle(
@@ -120,14 +136,39 @@ class _ItemListScreenState extends State<ItemListScreen> {
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              SizedBox(height: 10),
-                              Text(
-                                '\$${price.toString()}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.deepPurple,
-                                  fontSize: 16,
-                                ),
+                              const SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  Text(
+                                    '\$${price.toString()}',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.deepPurple,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  if (discountedAmount != null &&
+                                      discountedPercentage != null) ...[
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      '\$${discountedAmount.toStringAsFixed(2)}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.green,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      '(${discountedPercentage.toStringAsFixed(1)}% off)',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.red,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ],
                               ),
                             ],
                           ),

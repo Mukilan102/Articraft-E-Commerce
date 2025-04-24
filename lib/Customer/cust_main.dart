@@ -3,6 +3,7 @@ import "package:flutter/material.dart";
 import 'package:articraft_ui/Customer/pg1_cust_home.dart';
 import 'package:articraft_ui/Customer/page4.dart';
 import 'package:articraft_ui/Customer/page2.dart';
+import 'package:articraft_ui/Customer/SearchResultsScreen.dart';
 
 class CustomerHome extends StatefulWidget {
   const CustomerHome({super.key});
@@ -13,10 +14,19 @@ class CustomerHome extends StatefulWidget {
 
 class _CustomerHomeState extends State<CustomerHome> {
   int pageIndex = 0;
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   // Use a separate Navigator key for page content
   final GlobalKey<NavigatorState> _pageNavigatorKey =
       GlobalKey<NavigatorState>();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   Widget _getPage(int index) {
     switch (index) {
@@ -52,6 +62,63 @@ class _CustomerHomeState extends State<CustomerHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search...',
+                  border: InputBorder.none,
+                  suffixIcon: IconButton(
+                    icon: Text('Go'),
+                    onPressed: () {
+                      setState(() {
+                        _searchQuery = _searchController.text;
+                        _isSearching = false;
+                      });
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SearchResultsScreen(
+                            searchQuery: _searchQuery,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                autofocus: true,
+                onSubmitted: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                    _isSearching = false;
+                  });
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SearchResultsScreen(
+                        searchQuery: _searchQuery,
+                      ),
+                    ),
+                  );
+                },
+              )
+            : Text('Articraft'),
+        actions: [
+          IconButton(
+            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            onPressed: () {
+              setState(() {
+                _isSearching = !_isSearching;
+                if (!_isSearching) {
+                  _searchController.clear();
+                  _searchQuery = '';
+                }
+              });
+            },
+          ),
+        ],
+      ),
       body: WillPopScope(
         onWillPop: () async {
           // Handle back button - try to pop current page navigator first

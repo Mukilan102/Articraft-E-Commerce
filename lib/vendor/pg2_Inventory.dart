@@ -15,11 +15,25 @@ class _UploadProductPageState extends State<UploadProductPage> {
   final _formKey = GlobalKey<FormState>();
   XFile? _image;
   bool _isUploading = false;
+  String? _selectedCategory; // Add this for category selection
+
+  // Add the categories list (excluding 'All')
+  final List<String> categories = [
+    'Chairs',
+    'Sofas',
+    'Tables',
+    'Beds',
+    'Wardrobes'
+  ];
 
   // TextEditingControllers for all fields
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
+  final TextEditingController _discountPercentageController =
+      TextEditingController(); // For percentage
+  final TextEditingController _discountAmountController =
+      TextEditingController(); // For amount
 
   // Get the singleton instance of DioClient
   final DioClient _dioClient = DioClient();
@@ -29,6 +43,19 @@ class _UploadProductPageState extends State<UploadProductPage> {
     super.initState();
     // Initialize Dio Interceptors here
     _dioClient.setupInterceptors(context);
+
+    // Add listeners to enforce the constraint
+    _discountPercentageController.addListener(() {
+      if (_discountPercentageController.text.isNotEmpty) {
+        _discountAmountController.clear();
+      }
+    });
+
+    _discountAmountController.addListener(() {
+      if (_discountAmountController.text.isNotEmpty) {
+        _discountPercentageController.clear();
+      }
+    });
   }
 
   @override
@@ -37,6 +64,8 @@ class _UploadProductPageState extends State<UploadProductPage> {
     _nameController.dispose();
     _descriptionController.dispose();
     _priceController.dispose();
+    _discountPercentageController.dispose();
+    _discountAmountController.dispose();
     super.dispose();
   }
 
@@ -44,9 +73,11 @@ class _UploadProductPageState extends State<UploadProductPage> {
     _nameController.clear();
     _descriptionController.clear();
     _priceController.clear();
-
+    _discountPercentageController.clear();
+    _discountAmountController.clear();
     setState(() {
       _image = null;
+      _selectedCategory = null; // Clear selected category
     });
   }
 
@@ -69,8 +100,11 @@ class _UploadProductPageState extends State<UploadProductPage> {
   }
 
   Future<void> _uploadProduct() async {
-    if (!_formKey.currentState!.validate() || _image == null) {
-      _showErrorSnackBar('Please fill all fields and select an image');
+    if (!_formKey.currentState!.validate() ||
+        _image == null ||
+        _selectedCategory == null) {
+      _showErrorSnackBar(
+          'Please fill all fields, select a category, and select an image');
       return;
     }
 
@@ -82,18 +116,26 @@ class _UploadProductPageState extends State<UploadProductPage> {
       final bytes = await File(_image!.path).readAsBytes();
       final base64Image = base64Encode(bytes);
 
-      // Pass the full URL as you wish
       String fullUrl = 'http://localhost:5000/api/Vendor_Product_/prod';
+
+      final data = {
+        'name': _nameController.text.trim(),
+        'description': _descriptionController.text.trim(),
+        'price': double.parse(_priceController.text),
+        'image': base64Image,
+        'dispercentage': _discountPercentageController.text.isNotEmpty
+            ? double.tryParse(_discountPercentageController.text)
+            : null,
+        'disamount': _discountAmountController.text.isNotEmpty
+            ? double.tryParse(_discountAmountController.text)
+            : null,
+        'category': _selectedCategory // Use the selected category
+      };
 
       // Send request using DioClient instance
       final response = await _dioClient.dio.post(
         fullUrl,
-        data: {
-          'name': _nameController.text.trim(),
-          'description': _descriptionController.text.trim(),
-          'price': double.parse(_priceController.text),
-          'image': base64Image
-        },
+        data: data,
       );
 
       setState(() {
@@ -141,7 +183,6 @@ class _UploadProductPageState extends State<UploadProductPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -154,7 +195,8 @@ class _UploadProductPageState extends State<UploadProductPage> {
                   labelText: 'Product Name',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) => value!.trim().isEmpty ? 'Enter product name' : null,
+                validator: (value) =>
+                    value!.trim().isEmpty ? 'Enter product name' : null,
                 enabled: !_isUploading,
               ),
               SizedBox(height: 16),
@@ -165,7 +207,8 @@ class _UploadProductPageState extends State<UploadProductPage> {
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 3,
-                validator: (value) => value!.trim().isEmpty ? 'Enter description' : null,
+                validator: (value) =>
+                    value!.trim().isEmpty ? 'Enter description' : null,
                 enabled: !_isUploading,
               ),
               SizedBox(height: 16),
@@ -179,6 +222,60 @@ class _UploadProductPageState extends State<UploadProductPage> {
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
                 validator: _validatePrice,
                 enabled: !_isUploading,
+              ),
+              SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _discountPercentageController,
+                      decoration: InputDecoration(
+                        labelText: 'Percentage',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType:
+                          TextInputType.numberWithOptions(decimal: true),
+                      enabled: !_isUploading,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _discountAmountController,
+                      decoration: InputDecoration(
+                        labelText: 'Amount',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType:
+                          TextInputType.numberWithOptions(decimal: true),
+                      enabled: !_isUploading,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 16),
+              // Add Category Dropdown
+              DropdownButtonFormField<String>(
+                value: _selectedCategory,
+                decoration: InputDecoration(
+                  labelText: 'Category',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) =>
+                    value == null ? 'Please select a category' : null,
+                items: categories.map((String category) {
+                  return DropdownMenuItem<String>(
+                    value: category,
+                    child: Text(category),
+                  );
+                }).toList(),
+                onChanged: _isUploading
+                    ? null
+                    : (String? newValue) {
+                        setState(() {
+                          _selectedCategory = newValue;
+                        });
+                      },
               ),
               SizedBox(height: 20),
               ElevatedButton.icon(

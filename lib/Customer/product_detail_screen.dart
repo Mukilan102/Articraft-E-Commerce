@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert'; // For JSON encoding/decoding
 import 'Productmodel.dart';
+import 'UserDioClient.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String productId;
@@ -46,22 +47,62 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   /// Function to add product to the cart (for guest users)
   Future<void> addToCart() async {
     try {
-      String? cartData = await _secureStorage.read(key: "cart");
-      List<String> cartItems =
-          cartData != null ? List<String>.from(json.decode(cartData)) : [];
+      // Check if user is logged in and token is valid
+      String? token = await _secureStorage.read(key: 'token');
+      bool isLoggedIn = token != null && await UserDioClient().isTokenValid();
 
-      // Add new product ID if not already in the cart
-      if (!cartItems.contains(widget.productId)) {
-        cartItems.add(widget.productId);
+      if (isLoggedIn) {
+        print('Token found and valid: $token'); // Debug log
+        // For logged-in users - add to database cart
+        try {
+          final response = await _dio.post(
+            'http://localhost:5000/api/Cart/addToCart',
+            data: {"productId": widget.productId},
+            options: Options(
+              headers: {
+                'Authorization': 'Bearer $token',
+                'Content-Type': 'application/json'
+              },
+            ),
+          );
+
+          print('Response status: ${response.statusCode}'); // Debug log
+          print('Response data: ${response.data}'); // Debug log
+
+          if (response.statusCode == 200) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Added to cart successfully!")),
+            );
+          } else {
+            throw Exception(
+                'Failed to add to cart. Status code: ${response.statusCode}');
+          }
+        } catch (e) {
+          print('API Error details: $e'); // Debug log
+          throw Exception('API Error: $e');
+        }
+      } else {
+        // For guest users - store locally
+        String? cartData = await _secureStorage.read(key: "cart");
+        List<String> cartItems =
+            cartData != null ? List<String>.from(json.decode(cartData)) : [];
+
+        // Add new product ID if not already in the cart
+        if (!cartItems.contains(widget.productId)) {
+          cartItems.add(widget.productId);
+        }
+
+        await _secureStorage.write(key: "cart", value: json.encode(cartItems));
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Added to cart successfully!")),
+        );
       }
-
-      await _secureStorage.write(key: "cart", value: json.encode(cartItems));
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Added to cart successfully!")),
-      );
     } catch (e) {
-      print("Error adding to cart: $e");
+      print("Error adding to cart: $e"); // Debug log
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to add to cart: ${e.toString()}")),
+      );
     }
   }
 
