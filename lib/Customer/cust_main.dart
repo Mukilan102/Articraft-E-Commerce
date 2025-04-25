@@ -4,6 +4,7 @@ import 'package:articraft_ui/Customer/pg1_cust_home.dart';
 import 'package:articraft_ui/Customer/page4.dart';
 import 'package:articraft_ui/Customer/page2.dart';
 import 'package:articraft_ui/Customer/SearchResultsScreen.dart';
+import 'package:articraft_ui/Customer/fur_predict.dart';
 
 class CustomerHome extends StatefulWidget {
   const CustomerHome({super.key});
@@ -105,6 +106,17 @@ class _CustomerHomeState extends State<CustomerHome> {
               )
             : Text('Articraft'),
         actions: [
+          IconButton(
+            icon: Icon(Icons.camera_alt),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ImageUploadPage(),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: Icon(_isSearching ? Icons.close : Icons.search),
             onPressed: () {
