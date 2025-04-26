@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:shimmer/shimmer.dart'; // Import shimmer for eye-catching effect
+import 'package:shimmer/shimmer.dart';
 
 import 'ProductListScreen.dart';
 
@@ -16,7 +16,7 @@ class ShopListScreen extends StatefulWidget {
 class _ShopListScreenState extends State<ShopListScreen> {
   List<Shop> shops = [];
   bool isLoading = true;
-  String? errorMessage; // To store error messages
+  String? errorMessage;
   final Dio _dio = Dio();
 
   @override
@@ -36,7 +36,7 @@ class _ShopListScreenState extends State<ShopListScreen> {
               .map((json) => Shop.fromJson(json))
               .toList();
           isLoading = false;
-          errorMessage = null; // Clear any previous error messages
+          errorMessage = null;
         });
       }
     } catch (e) {
@@ -54,33 +54,59 @@ class _ShopListScreenState extends State<ShopListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'CLUSTER',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+        title: const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Disclaimer:',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+                fontSize: 12,
+              ),
+            ),
+            Text(
+              'The Articraft is a medium between the vendor and you',
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 12,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              'so the risks are subjected to you',
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 12,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(255, 250, 250, 250),
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
+        toolbarHeight: 80, // Increased height to accommodate disclaimer
       ),
       body: Container(
-        color: Colors.grey[200], // Set background color to light gray
+        color: Color.fromARGB(255, 250, 250, 250),
         child: Padding(
           padding: const EdgeInsets.all(10.0),
           child: isLoading
-              ? _buildShimmerEffect() // Show shimmer while loading
+              ? _buildShimmerEffect()
               : errorMessage != null
-                  ? Center(child: Text(errorMessage!)) // Show error message
+                  ? Center(child: Text(errorMessage!))
                   : shops.isEmpty
                       ? const Center(child: Text("No shops available"))
                       : GridView.builder(
                           itemCount: shops.length,
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2, // Two shops per row
+                            crossAxisCount: 2,
                             crossAxisSpacing: 10,
                             mainAxisSpacing: 10,
-                            childAspectRatio: 0.8, // Adjust card aspect ratio
+                            childAspectRatio: 0.8,
                           ),
                           itemBuilder: (context, index) {
                             return _buildShopCard(shops[index]);
@@ -91,10 +117,9 @@ class _ShopListScreenState extends State<ShopListScreen> {
     );
   }
 
-  // Shimmer Effect for Loading State
   Widget _buildShimmerEffect() {
     return GridView.builder(
-      itemCount: 6, // Show 6 shimmer items
+      itemCount: 6,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 10,
@@ -116,7 +141,6 @@ class _ShopListScreenState extends State<ShopListScreen> {
     );
   }
 
-  // Shop Card with Animations - Modified to place text below the card
   Widget _buildShopCard(Shop shop) {
     return GestureDetector(
       onTap: () {
@@ -136,8 +160,7 @@ class _ShopListScreenState extends State<ShopListScreen> {
         children: [
           Expanded(
             child: Hero(
-              tag: shop.name +
-                  (shop.image?.hashCode.toString() ?? ''), // Ensure unique tag
+              tag: shop.name + (shop.image?.hashCode.toString() ?? ''),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
@@ -172,7 +195,7 @@ class _ShopListScreenState extends State<ShopListScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 8), // Add some spacing between card and text
+          const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: Text(
@@ -191,7 +214,6 @@ class _ShopListScreenState extends State<ShopListScreen> {
   }
 }
 
-// Shop Model
 class Shop {
   final String name;
   final Uint8List? image;

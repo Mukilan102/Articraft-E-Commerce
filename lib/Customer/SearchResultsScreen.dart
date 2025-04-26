@@ -48,15 +48,22 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Search Results: ${widget.searchQuery}',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+        automaticallyImplyLeading: false,
+        title: Text(
+          'Search Results: ${widget.searchQuery}',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(255, 250, 250, 250),
         elevation: 0,
         iconTheme: IconThemeData(color: Colors.black),
       ),
       body: Container(
-        color: Colors.grey[200],
+        color: const Color.fromARGB(255, 250, 250, 250),
         child: isLoading
             ? Center(child: CircularProgressIndicator())
             : products.isEmpty
@@ -84,16 +91,18 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                                     height: 80,
                                     fit: BoxFit.cover,
                                   )
-                                : Image.asset(
-                                    'assets/placeholder.png',
+                                : Container(
                                     width: 80,
                                     height: 80,
-                                    fit: BoxFit.cover,
+                                    color: Colors.grey[200],
+                                    child: Icon(Icons.image,
+                                        color: Colors.grey[400]),
                                   ),
                           ),
                           title: Text(
                             product.name,
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
                           ),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,19 +110,83 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                               SizedBox(height: 4),
                               Text(
                                 product.description,
-                                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                style: TextStyle(
+                                    color: Colors.grey[600], fontSize: 12),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               SizedBox(height: 6),
-                              Text(
-                                '\$${product.price.toStringAsFixed(2)}',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, color: Colors.green),
+                              Row(
+                                children: [
+                                  if (product.getDiscountedAmount() !=
+                                      null) ...[
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey[200],
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: const Color.fromARGB(
+                                              255, 186, 128, 128),
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        '\$${product.getDiscountedAmount()!.toStringAsFixed(2)}',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: const Color.fromARGB(
+                                                255, 0, 0, 0),
+                                            fontSize: 14),
+                                      ),
+                                    ),
+                                    SizedBox(width: 5),
+                                    Text(
+                                      '\$${product.price.toStringAsFixed(2)}',
+                                      style: TextStyle(
+                                          decoration:
+                                              TextDecoration.lineThrough,
+                                          color: Colors.grey[600],
+                                          fontSize: 12),
+                                    ),
+                                  ] else
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey[200],
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: const Color.fromARGB(
+                                              255, 186, 128, 128),
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        '\$${product.price.toStringAsFixed(2)}',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: const Color.fromARGB(
+                                                255, 0, 0, 0),
+                                            fontSize: 15),
+                                      ),
+                                    ),
+                                  SizedBox(width: 5),
+                                  if (product.getDiscountedPercentage() != null)
+                                    Text(
+                                      '(${product.getDiscountedPercentage()!.toStringAsFixed(1)}% off)',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.red[300],
+                                          fontSize: 12),
+                                    ),
+                                ],
                               ),
                             ],
                           ),
-                          trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                          trailing: Icon(Icons.arrow_forward_ios,
+                              size: 16, color: Colors.grey),
                           onTap: () {
                             Navigator.push(
                               context,
