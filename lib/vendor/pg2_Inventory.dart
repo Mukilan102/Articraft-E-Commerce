@@ -23,7 +23,6 @@ class _UploadProductPageState extends State<UploadProductPage> {
     'Sofas',
     'Tables',
     'Beds',
-    'Wardrobes'
   ];
 
   // TextEditingControllers for all fields
@@ -159,7 +158,9 @@ class _UploadProductPageState extends State<UploadProductPage> {
 
   void _showSuccessSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.green),
+      SnackBar(
+          content: Text(message),
+          backgroundColor: const Color.fromARGB(255, 200, 200, 200)),
     );
   }
 
@@ -183,132 +184,384 @@ class _UploadProductPageState extends State<UploadProductPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'Product Name',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) =>
-                    value!.trim().isEmpty ? 'Enter product name' : null,
-                enabled: !_isUploading,
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: InputDecoration(
-                  labelText: 'Description',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 3,
-                validator: (value) =>
-                    value!.trim().isEmpty ? 'Enter description' : null,
-                enabled: !_isUploading,
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _priceController,
-                decoration: InputDecoration(
-                  labelText: 'Price',
-                  border: OutlineInputBorder(),
-                  prefixText: '\$',
-                ),
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-                validator: _validatePrice,
-                enabled: !_isUploading,
-              ),
-              SizedBox(height: 16),
-              Row(
+      backgroundColor: const Color.fromARGB(255, 250, 250, 250),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _discountPercentageController,
-                      decoration: InputDecoration(
-                        labelText: 'Percentage',
-                        border: OutlineInputBorder(),
+                  SizedBox(height: 20),
+                  Center(
+                    child: Text(
+                      'Upload New Product',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
-                      keyboardType:
-                          TextInputType.numberWithOptions(decimal: true),
-                      enabled: !_isUploading,
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _discountAmountController,
-                      decoration: InputDecoration(
-                        labelText: 'Amount',
-                        border: OutlineInputBorder(),
+                  SizedBox(height: 8),
+                  Center(
+                    child: Text(
+                      'Add your product to the marketplace',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[600],
                       ),
-                      keyboardType:
-                          TextInputType.numberWithOptions(decimal: true),
-                      enabled: !_isUploading,
                     ),
                   ),
+                  SizedBox(height: 40),
+                  _buildInputField(
+                    label: 'Product Name',
+                    controller: _nameController,
+                    icon: Icons.shopping_bag_outlined,
+                    validator: (value) =>
+                        value?.isEmpty == true ? 'Enter product name' : null,
+                  ),
+                  SizedBox(height: 20),
+                  _buildInputField(
+                    label: 'Description',
+                    controller: _descriptionController,
+                    icon: Icons.description_outlined,
+                    validator: (value) =>
+                        value?.isEmpty == true ? 'Enter description' : null,
+                    maxLines: 3,
+                  ),
+                  SizedBox(height: 20),
+                  _buildInputField(
+                    label: 'Price',
+                    controller: _priceController,
+                    icon: Icons.attach_money_outlined,
+                    validator: _validatePrice,
+                    keyboardType:
+                        TextInputType.numberWithOptions(decimal: true),
+                    prefixText: '\$',
+                  ),
+                  SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildInputField(
+                          label: 'Discount Percentage',
+                          controller: _discountPercentageController,
+                          icon: Icons.percent_outlined,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          validator: (value) {
+                            if (value != null && value.isNotEmpty) {
+                              try {
+                                double percentage = double.parse(value);
+                                if (percentage < 0 || percentage > 100) {
+                                  return 'Percentage must be between 0 and 100';
+                                }
+                              } catch (e) {
+                                return 'Enter valid percentage';
+                              }
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: _buildInputField(
+                          label: 'Discount Amount',
+                          controller: _discountAmountController,
+                          icon: Icons.money_off_outlined,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          validator: (value) {
+                            if (value != null && value.isNotEmpty) {
+                              try {
+                                double amount = double.parse(value);
+                                if (amount < 0) {
+                                  return 'Amount must be positive';
+                                }
+                              } catch (e) {
+                                return 'Enter valid amount';
+                              }
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    'Category',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          spreadRadius: 0,
+                        ),
+                      ],
+                    ),
+                    child: DropdownButtonFormField<String>(
+                      value: _selectedCategory,
+                      dropdownColor: const Color.fromARGB(255, 255, 200, 200),
+                      menuMaxHeight: 300,
+                      isExpanded: true,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      icon: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: Colors.grey[600],
+                        size: 24,
+                      ),
+                      iconEnabledColor: Colors.grey[600],
+                      decoration: InputDecoration(
+                        hintText: 'Select category',
+                        hintStyle: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 16,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.category_outlined,
+                          color: Colors.grey[400],
+                          size: 20,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Colors.grey[200]!,
+                            width: 1,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: const Color.fromARGB(255, 255, 200, 200),
+                            width: 1,
+                          ),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      ),
+                      selectedItemBuilder: (BuildContext context) {
+                        return categories.map<Widget>((String item) {
+                          return Container(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              item,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          );
+                        }).toList();
+                      },
+                      items: categories.map((String category) {
+                        return DropdownMenuItem<String>(
+                          value: category,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 16),
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: Colors.grey[200]!,
+                                  width: 1,
+                                ),
+                              ),
+                            ),
+                            child: Text(
+                              category,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                      validator: (value) =>
+                          value == null ? 'Please select a category' : null,
+                      onChanged: _isUploading
+                          ? null
+                          : (String? newValue) {
+                              setState(() {
+                                _selectedCategory = newValue;
+                              });
+                            },
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          spreadRadius: 0,
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton.icon(
+                      onPressed: _isUploading ? null : _pickImage,
+                      icon: Icon(Icons.image, color: Colors.red[300]),
+                      label: Text(
+                        'Upload Product Image',
+                        style: TextStyle(
+                          color: Colors.red[300],
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        minimumSize: Size(double.infinity, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                    ),
+                  ),
+                  if (_image != null) ...[
+                    SizedBox(height: 20),
+                    Container(
+                      height: 200,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child:
+                            Image.file(File(_image!.path), fit: BoxFit.cover),
+                      ),
+                    ),
+                  ],
+                  SizedBox(height: 40),
+                  _isUploading
+                      ? Center(child: CircularProgressIndicator())
+                      : ElevatedButton(
+                          onPressed: _uploadProduct,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color.fromARGB(255, 255, 200, 200),
+                            minimumSize: Size(double.infinity, 50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            'Upload Product',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.red[300],
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                 ],
               ),
-              SizedBox(height: 16),
-              // Add Category Dropdown
-              DropdownButtonFormField<String>(
-                value: _selectedCategory,
-                decoration: InputDecoration(
-                  labelText: 'Category',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) =>
-                    value == null ? 'Please select a category' : null,
-                items: categories.map((String category) {
-                  return DropdownMenuItem<String>(
-                    value: category,
-                    child: Text(category),
-                  );
-                }).toList(),
-                onChanged: _isUploading
-                    ? null
-                    : (String? newValue) {
-                        setState(() {
-                          _selectedCategory = newValue;
-                        });
-                      },
-              ),
-              SizedBox(height: 20),
-              ElevatedButton.icon(
-                onPressed: _isUploading ? null : _pickImage,
-                icon: Icon(Icons.image),
-                label: Text('Pick Image'),
-              ),
-              if (_image != null) ...[
-                SizedBox(height: 10),
-                SizedBox(
-                  height: 200,
-                  width: 200,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.file(File(_image!.path), fit: BoxFit.cover),
-                  ),
-                ),
-              ],
-              SizedBox(height: 20),
-              SizedBox(
-                height: 50,
-                child: _isUploading
-                    ? Center(child: CircularProgressIndicator())
-                    : ElevatedButton.icon(
-                        onPressed: _uploadProduct,
-                        icon: Icon(Icons.upload),
-                        label: Text('Upload Product'),
-                      ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildInputField({
+    required String label,
+    required TextEditingController controller,
+    required IconData icon,
+    required String? Function(String?)? validator,
+    bool obscureText = false,
+    String? helperText,
+    Widget? suffixIcon,
+    TextInputType? keyboardType,
+    int maxLines = 1,
+    String? prefixText,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[800],
+          ),
+        ),
+        SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                spreadRadius: 0,
+              ),
+            ],
+          ),
+          child: TextFormField(
+            controller: controller,
+            obscureText: obscureText,
+            keyboardType: keyboardType,
+            maxLines: maxLines,
+            decoration: InputDecoration(
+              hintText: 'Enter your $label',
+              prefixIcon: Icon(icon, color: Colors.grey[400]),
+              prefixText: prefixText,
+              suffixIcon: suffixIcon,
+              helperText: helperText,
+              helperStyle: TextStyle(color: Colors.grey[600], fontSize: 12),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.white,
+            ),
+            validator: validator,
+            enabled: !_isUploading,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -39,100 +39,189 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200],
+      backgroundColor: const Color.fromARGB(255, 250, 250, 250),
       appBar: AppBar(
-        title: Text('Profile'),
-        backgroundColor: Colors.deepPurple,
+        automaticallyImplyLeading: false,
+        title: Text(
+          'Profile',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.grey[800],
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 250, 250, 250),
         elevation: 0,
+        iconTheme: IconThemeData(color: Colors.black),
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : profileData == null
               ? Center(child: Text('No profile data available.'))
               : SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(20.0),
-                        decoration: BoxDecoration(
-                          color: Colors.deepPurple,
-                          borderRadius: BorderRadius.vertical(
-                            bottom: Radius.circular(30),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Shop Information',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
                           ),
                         ),
-                        child: Column(
-                          children: [
-                            CircleAvatar(
-                              radius: 60,
-                              backgroundColor: Colors.white,
-                              child: Icon(
-                                Icons.person,
-                                size: 80,
-                                color: Colors.deepPurple,
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            Text(
+                        SizedBox(height: 8),
+                        Text(
+                          'Manage your shop details',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        SizedBox(height: 32),
+                        _buildProfileSection(
+                          'Personal Information',
+                          [
+                            _buildProfileItem(
+                              Icons.person_outline,
+                              'Username',
                               profileData!['userName'] ?? 'N/A',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                              ),
                             ),
-                            SizedBox(height: 5),
-                            Text(
+                            _buildProfileItem(
+                              Icons.email_outlined,
+                              'Email',
                               profileData!['email'] ?? 'N/A',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 16,
-                              ),
+                            ),
+                            _buildProfileItem(
+                              Icons.phone_outlined,
+                              'Mobile Number',
+                              profileData!['mobileNo'] ?? 'N/A',
                             ),
                           ],
                         ),
-                      ),
-                      SizedBox(height: 20),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: Column(
-                          children: [
-                            buildProfileItem(
-                                Icons.phone, 'Mobile', profileData!['mobileNo']),
-                            buildProfileItem(Icons.store, 'Shop Name',
-                                profileData!['shopname']),
-                            buildProfileItem(Icons.description, 'Description',
-                                profileData!['description']),
-                            buildProfileItem(Icons.location_on, 'Location',
-                                profileData!['location']),
+                        SizedBox(height: 24),
+                        _buildProfileSection(
+                          'Shop Details',
+                          [
+                            _buildProfileItem(
+                              Icons.store_outlined,
+                              'Shop Name',
+                              profileData!['shopname'] ?? 'N/A',
+                            ),
+                            _buildProfileItem(
+                              Icons.description_outlined,
+                              'Description',
+                              profileData!['description'] ?? 'N/A',
+                            ),
+                            _buildProfileItem(
+                              Icons.location_on_outlined,
+                              'Location',
+                              profileData!['location'] ?? 'N/A',
+                            ),
                           ],
                         ),
-                      ),
-                    ],
+                        SizedBox(height: 24),
+                        _buildProfileSection(
+                          'Account Settings',
+                          [
+                            _buildProfileItem(
+                              Icons.lock_outline,
+                              'Change Password',
+                              'Update your password',
+                              isAction: true,
+                              onTap: () {
+                                // TODO: Implement change password
+                              },
+                            ),
+                            _buildProfileItem(
+                              Icons.logout,
+                              'Sign Out',
+                              'Log out from your account',
+                              isAction: true,
+                              onTap: () {
+                                // TODO: Implement sign out
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
     );
   }
 
-  Widget buildProfileItem(IconData icon, String title, String? value) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
-      elevation: 3,
-      child: ListTile(
-        leading: Icon(
-          icon,
-          color: Colors.deepPurple,
+  Widget _buildProfileSection(String title, List<Widget> items) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[800],
+          ),
         ),
+        SizedBox(height: 16),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                spreadRadius: 0,
+              ),
+            ],
+          ),
+          child: Column(
+            children: items,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProfileItem(
+    IconData icon,
+    String title,
+    String subtitle, {
+    bool isAction = false,
+    VoidCallback? onTap,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Colors.grey[200]!,
+            width: 1,
+          ),
+        ),
+      ),
+      child: ListTile(
+        leading: Icon(icon, color: Colors.grey[600]),
         title: Text(
           title,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.deepPurple,
+            color: Colors.grey[800],
           ),
         ),
-        subtitle: Text(value ?? 'N/A'),
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(
+            color: isAction ? Colors.grey[600] : Colors.grey[700],
+          ),
+        ),
+        trailing: isAction
+            ? Icon(Icons.chevron_right, color: Colors.grey[400])
+            : null,
+        onTap: onTap,
       ),
     );
   }

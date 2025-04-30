@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'UserDioClient.dart';
 import 'User_Register.dart';
-import 'package:articraft_ui/Customer/pg1_cust_home.dart';
+import 'package:articraft_ui/Customer/page4.dart';
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -17,9 +17,10 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _obscurePassword = true;
   final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
   final Dio _dio = Dio();
 
@@ -40,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
     } else {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => ShopListScreen(),
+          builder: (_) => ProfileScreen(),
         ),
       );
     }
@@ -91,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
 
       try {
         final response = await UserDioClient().login(
-          _emailController.text,
+          _usernameController.text,
           _passwordController.text,
         );
 
@@ -99,18 +100,18 @@ class _LoginPageState extends State<LoginPage> {
           await _secureStorage.write(
               key: 'token', value: response.data['token']);
           String? token = await _secureStorage.read(key: 'token');
-          print('Stored token: $token');
+          
           getUserType();
           await _secureStorage.write(
-              key: "user_id", value: _emailController.text);
-          print("email value: ${_emailController.text}");
-          await migrateCartToDatabase(_emailController.text);
+              key: "user_id", value: _usernameController.text);
+          
+          await migrateCartToDatabase(_usernameController.text);
 
           // Delete stored cart data if present after migration
           String? storedCartData = await _secureStorage.read(key: "cart");
           if (storedCartData != null) {
             await _secureStorage.delete(key: "cart");
-            print("Deleted local cart data after migration.");
+            
           }
 
           // After login, check if a productId exists and navigate accordingly
@@ -129,63 +130,199 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) =>
-                    value?.isEmpty == true ? 'Please enter username' : null,
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(),
-                ),
-                obscureText: true,
-                validator: (value) =>
-                    value?.isEmpty == true ? 'Please enter password' : null,
-              ),
-              SizedBox(height: 24),
-              _isLoading
-                  ? CircularProgressIndicator()
-                  : Column(
-                      children: [
-                        ElevatedButton(
-                          onPressed: _login,
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: Size(double.infinity, 50),
-                          ),
-                          child: Text('Login'),
-                        ),
-                        SizedBox(height: 16),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => UserRegisterPage()),
-                            );
-                          },
-                          child: Text('Create new account'),
-                        ),
-                      ],
+      backgroundColor: const Color.fromARGB(255, 250, 250, 250),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 40),
+                  Center(
+                    child: Text(
+                      'Welcome Back',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                     ),
-            ],
+                  ),
+                  SizedBox(height: 8),
+                  Center(
+                    child: Text(
+                      'Sign in to continue shopping',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 40),
+                  _buildInputField(
+                    label: 'Username',
+                    controller: _usernameController,
+                    icon: Icons.person_outline,
+                    validator: (value) =>
+                        value?.isEmpty == true ? 'Please enter username' : null,
+                  ),
+                  SizedBox(height: 20),
+                  _buildInputField(
+                    label: 'Password',
+                    controller: _passwordController,
+                    icon: Icons.lock_outline,
+                    validator: (value) =>
+                        value?.isEmpty == true ? 'Please enter password' : null,
+                    obscureText: _obscurePassword,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: Colors.grey[400],
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        // TODO: Implement forgot password
+                      },
+                      child: Text(
+                        'Forgot Password?',
+                        style: TextStyle(
+                          color: Colors.red[300],
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 40),
+                  _isLoading
+                      ? Center(child: CircularProgressIndicator())
+                      : Column(
+                          children: [
+                            ElevatedButton(
+                              onPressed: _login,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    Color.fromARGB(255, 255, 200, 200),
+                                minimumSize: Size(double.infinity, 50),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: Text(
+                                'Sign In',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.red[300],
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Don't have an account? ",
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (_) => UserRegisterPage()),
+                                    );
+                                  },
+                                  child: Text(
+                                    'Sign Up',
+                                    style: TextStyle(
+                                      color: Colors.red[300],
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildInputField({
+    required String label,
+    required TextEditingController controller,
+    required IconData icon,
+    required String? Function(String?)? validator,
+    bool obscureText = false,
+    Widget? suffixIcon,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[800],
+          ),
+        ),
+        SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                spreadRadius: 0,
+              ),
+            ],
+          ),
+          child: TextFormField(
+            controller: controller,
+            obscureText: obscureText,
+            decoration: InputDecoration(
+              hintText: 'Enter your $label',
+              prefixIcon: Icon(icon, color: Colors.grey[400]),
+              suffixIcon: suffixIcon,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: Colors.white,
+            ),
+            validator: validator,
+          ),
+        ),
+      ],
     );
   }
 }

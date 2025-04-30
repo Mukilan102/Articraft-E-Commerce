@@ -16,11 +16,18 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   List<Product> products = [];
   bool isLoading = true;
   final Dio _dio = Dio();
+  bool _mounted = true;
 
   @override
   void initState() {
     super.initState();
     fetchSearchResults();
+  }
+
+  @override
+  void dispose() {
+    _mounted = false;
+    super.dispose();
   }
 
   Future<void> fetchSearchResults() async {
@@ -30,16 +37,20 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         queryParameters: {'query': widget.searchQuery},
       );
 
-      setState(() {
-        products = (response.data as List)
-            .map((json) => Product.fromJson(json))
-            .toList();
-        isLoading = false;
-      });
+      if (_mounted) {
+        setState(() {
+          products = (response.data as List)
+              .map((json) => Product.fromJson(json))
+              .toList();
+          isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
+      if (_mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
       print('Error: $e');
     }
   }

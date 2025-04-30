@@ -101,6 +101,7 @@ class _Page2State extends State<Page2> {
   List<Product> products = [];
   bool isLoading = true;
   String selectedCategory = 'All';
+  bool _mounted = true;
 
   final List<String> categories = [
     'All',
@@ -116,12 +117,20 @@ class _Page2State extends State<Page2> {
     fetchProducts();
   }
 
+  @override
+  void dispose() {
+    _mounted = false;
+    super.dispose();
+  }
+
   Future<void> fetchProducts() async {
+    if (!_mounted) return;
+
     try {
       var response = await _dio
           .get('http://localhost:5000/api/Customer/products_for_page2');
 
-      if (response.data is List) {
+      if (response.data is List && _mounted) {
         setState(() {
           products = (response.data as List)
               .map((json) => Product.fromJson(json))
@@ -133,12 +142,14 @@ class _Page2State extends State<Page2> {
       }
     } catch (e) {
       debugPrint('Error fetching products: $e');
-      setState(() {
-        isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load products: ${e.toString()}')),
-      );
+      if (_mounted) {
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load products: ${e.toString()}')),
+        );
+      }
     }
   }
 
@@ -183,9 +194,11 @@ class _Page2State extends State<Page2> {
                       label: Text(categories[index]),
                       selected: selectedCategory == categories[index],
                       onSelected: (selected) {
-                        setState(() {
-                          selectedCategory = categories[index];
-                        });
+                        if (_mounted) {
+                          setState(() {
+                            selectedCategory = categories[index];
+                          });
+                        }
                       },
                       selectedColor: Colors.red[300],
                       backgroundColor: Colors.red[80],
@@ -264,7 +277,8 @@ class _Page2State extends State<Page2> {
                                           borderRadius:
                                               BorderRadius.circular(12),
                                           border: Border.all(
-                                            color: const Color.fromARGB(255, 186, 128, 128),
+                                            color: const Color.fromARGB(
+                                                255, 186, 128, 128),
                                             width: 1,
                                           ),
                                         ),

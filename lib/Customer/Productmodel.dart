@@ -9,6 +9,8 @@ class Product {
   final Uint8List? imageBase64;
   final double? dispercentage;
   final double? disamount;
+  final String location;  // Add this line
+  final String mobileno;
 
   Product({
     required this.id,
@@ -18,6 +20,8 @@ class Product {
     this.imageBase64,
     this.dispercentage,
     this.disamount,
+    required this.location,  // Add this line
+    required this.mobileno,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -47,6 +51,8 @@ class Product {
       disamount: json['disamount'] != null
           ? (json['disamount'] as num).toDouble()
           : null,
+      location: json['location']?.toString() ?? '',  // Add this line
+      mobileno: json['mobileno']?.toString() ?? '', 
     );
   }
 

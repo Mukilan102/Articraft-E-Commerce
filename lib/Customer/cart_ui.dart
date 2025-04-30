@@ -153,157 +153,191 @@ class _CartPageState extends State<CartPage> {
       ),
       body: Container(
         color: const Color.fromARGB(255, 250, 250, 250),
-        child: _isLoading
-            ? Center(child: CircularProgressIndicator())
-            : _products.isEmpty
-                ? Center(child: Text('Add something to the cart'))
-                : ListView.builder(
-                    padding: EdgeInsets.all(10),
-                    itemCount: _products.length,
-                    itemBuilder: (context, index) {
-                      final product = _products[index];
-                      return Dismissible(
-                        key: Key(product.id),
-                        direction: DismissDirection.endToStart,
-                        background: Container(
-                          color: Colors.red,
-                          alignment: Alignment.centerRight,
-                          padding: EdgeInsets.only(right: 20),
-                          child: Icon(Icons.delete, color: Colors.white),
-                        ),
-                        onDismissed: (direction) => _removeItem(product.id),
-                        child: Card(
-                          color: Colors.white,
-                          margin: EdgeInsets.only(bottom: 10),
-                          elevation: 4,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: ListTile(
-                            contentPadding: EdgeInsets.all(10),
-                            leading: ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: product.imageBase64 != null
-                                  ? Image.memory(
-                                      product.imageBase64!,
-                                      width: 80,
-                                      height: 80,
-                                      fit: BoxFit.cover,
-                                    )
-                                  : Container(
-                                      width: 80,
-                                      height: 80,
-                                      color: Colors.grey[200],
-                                      child: Icon(Icons.image,
-                                          color: Colors.grey[400]),
-                                    ),
-                            ),
-                            title: Text(
-                              product.name,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(height: 4),
-                                Text(
-                                  product.description,
-                                  style: TextStyle(
-                                      color: Colors.grey[600], fontSize: 12),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
+        child: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.grey[300]!,
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  'Swipe left to remove item',
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: _isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : _products.isEmpty
+                      ? Center(child: Text('Add something to the cart'))
+                      : ListView.builder(
+                          padding: EdgeInsets.all(10),
+                          itemCount: _products.length,
+                          itemBuilder: (context, index) {
+                            final product = _products[index];
+                            return Dismissible(
+                              key: Key(product.id),
+                              direction: DismissDirection.endToStart,
+                              background: Container(
+                                color: Colors.red,
+                                alignment: Alignment.centerRight,
+                                padding: EdgeInsets.only(right: 20),
+                                child: Icon(Icons.delete, color: Colors.white),
+                              ),
+                              onDismissed: (direction) =>
+                                  _removeItem(product.id),
+                              child: Card(
+                                color: Colors.white,
+                                margin: EdgeInsets.only(bottom: 10),
+                                elevation: 4,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
                                 ),
-                                SizedBox(height: 6),
-                                Row(
-                                  children: [
-                                    if (product.getDiscountedAmount() !=
-                                        null) ...[
-                                      Container(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 8, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[200],
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          border: Border.all(
-                                            color: const Color.fromARGB(
-                                                255, 186, 128, 128),
-                                            width: 1,
+                                child: ListTile(
+                                  contentPadding: EdgeInsets.all(10),
+                                  leading: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: product.imageBase64 != null
+                                        ? Image.memory(
+                                            product.imageBase64!,
+                                            width: 80,
+                                            height: 80,
+                                            fit: BoxFit.cover,
+                                          )
+                                        : Container(
+                                            width: 80,
+                                            height: 80,
+                                            color: Colors.grey[200],
+                                            child: Icon(Icons.image,
+                                                color: Colors.grey[400]),
                                           ),
-                                        ),
-                                        child: Text(
-                                          '\$${product.getDiscountedAmount()!.toStringAsFixed(2)}',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: const Color.fromARGB(
-                                                  255, 0, 0, 0),
-                                              fontSize: 14),
-                                        ),
-                                      ),
-                                      SizedBox(width: 5),
+                                  ),
+                                  title: Text(
+                                    product.name,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16),
+                                  ),
+                                  subtitle: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(height: 4),
                                       Text(
-                                        '\$${product.price.toStringAsFixed(2)}',
+                                        product.description,
                                         style: TextStyle(
-                                            decoration:
-                                                TextDecoration.lineThrough,
                                             color: Colors.grey[600],
                                             fontSize: 12),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                    ] else
-                                      Container(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 8, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[200],
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          border: Border.all(
-                                            color: const Color.fromARGB(
-                                                255, 186, 128, 128),
-                                            width: 1,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          '\$${product.price.toStringAsFixed(2)}',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: const Color.fromARGB(
-                                                  255, 0, 0, 0),
-                                              fontSize: 15),
-                                        ),
+                                      SizedBox(height: 6),
+                                      Row(
+                                        children: [
+                                          if (product.getDiscountedAmount() !=
+                                              null) ...[
+                                            Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 8, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[200],
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                                border: Border.all(
+                                                  color: const Color.fromARGB(
+                                                      255, 186, 128, 128),
+                                                  width: 1,
+                                                ),
+                                              ),
+                                              child: Text(
+                                                '\$${product.getDiscountedAmount()!.toStringAsFixed(2)}',
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: const Color.fromARGB(
+                                                        255, 0, 0, 0),
+                                                    fontSize: 14),
+                                              ),
+                                            ),
+                                            SizedBox(width: 5),
+                                            Text(
+                                              '\$${product.price.toStringAsFixed(2)}',
+                                              style: TextStyle(
+                                                  decoration: TextDecoration
+                                                      .lineThrough,
+                                                  color: Colors.grey[600],
+                                                  fontSize: 12),
+                                            ),
+                                          ] else
+                                            Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 8, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[200],
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                                border: Border.all(
+                                                  color: const Color.fromARGB(
+                                                      255, 186, 128, 128),
+                                                  width: 1,
+                                                ),
+                                              ),
+                                              child: Text(
+                                                '\$${product.price.toStringAsFixed(2)}',
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: const Color.fromARGB(
+                                                        255, 0, 0, 0),
+                                                    fontSize: 15),
+                                              ),
+                                            ),
+                                          SizedBox(width: 5),
+                                          if (product
+                                                  .getDiscountedPercentage() !=
+                                              null)
+                                            Text(
+                                              '(${product.getDiscountedPercentage()!.toStringAsFixed(1)}% off)',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.red[300],
+                                                  fontSize: 12),
+                                            ),
+                                        ],
                                       ),
-                                    SizedBox(width: 5),
-                                    if (product.getDiscountedPercentage() !=
-                                        null)
-                                      Text(
-                                        '(${product.getDiscountedPercentage()!.toStringAsFixed(1)}% off)',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.red[300],
-                                            fontSize: 12),
-                                      ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            trailing: Icon(Icons.arrow_forward_ios,
-                                size: 16, color: Colors.grey),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ProductDetailScreen(
-                                    productId: product.id,
+                                    ],
                                   ),
+                                  trailing: Icon(Icons.arrow_forward_ios,
+                                      size: 16, color: Colors.grey),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            ProductDetailScreen(
+                                          productId: product.id,
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 ),
-                              );
-                            },
-                          ),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
+            ),
+          ],
+        ),
       ),
     );
   }
