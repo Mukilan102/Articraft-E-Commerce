@@ -15,6 +15,12 @@ class _AddressPageState extends State<AddressPage> {
   final TextEditingController _addressController = TextEditingController();
 
   @override
+  void dispose() {
+    _addressController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -55,25 +61,32 @@ class _AddressPageState extends State<AddressPage> {
                 child: ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      // Navigate to Payment Page with productId and address
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PaymentPage(),
+                          builder: (context) => PaymentPage(
+                            productId: widget.productId,
+                            address: _addressController.text,
+                          ),
                         ),
                       );
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
+                    backgroundColor: const Color.fromARGB(255, 255, 200, 200),
                     padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
+                    elevation: 0,
                   ),
                   child: Text(
                     "Proceed to Payment",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.red[300],
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'UserDioClient.dart';
 import 'User_Login.dart';
 import 'User_Register.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // Splash screen for authentication check
 class CustSplashScreen extends StatefulWidget {
@@ -198,6 +199,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, dynamic>? profileData;
   bool isLoading = true;
   final UserDioClient _dioClient = UserDioClient();
+  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
   @override
   void initState() {
@@ -219,6 +221,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
         isLoading = false;
       });
       print('Error: $e');
+    }
+  }
+
+  Future<void> _signOut() async {
+    try {
+      // Delete the token from secure storage
+      await _secureStorage.delete(key: 'token');
+
+      // Navigate to login page
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginPage()),
+        );
+      }
+    } catch (e) {
+      print('Error signing out: $e');
     }
   }
 
@@ -306,9 +325,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               'Sign Out',
                               'Log out from your account',
                               isAction: true,
-                              onTap: () {
-                                // TODO: Implement sign out
-                              },
+                              onTap: _signOut,
                             ),
                           ],
                         ),

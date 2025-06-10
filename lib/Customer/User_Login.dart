@@ -100,18 +100,17 @@ class _LoginPageState extends State<LoginPage> {
           await _secureStorage.write(
               key: 'token', value: response.data['token']);
           String? token = await _secureStorage.read(key: 'token');
-          
+
           getUserType();
           await _secureStorage.write(
               key: "user_id", value: _usernameController.text);
-          
+
           await migrateCartToDatabase(_usernameController.text);
 
           // Delete stored cart data if present after migration
           String? storedCartData = await _secureStorage.read(key: "cart");
           if (storedCartData != null) {
             await _secureStorage.delete(key: "cart");
-            
           }
 
           // After login, check if a productId exists and navigate accordingly
@@ -163,7 +162,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   SizedBox(height: 40),
                   _buildInputField(
-                    label: 'Username',
+                    label: 'Email ID',
                     controller: _usernameController,
                     icon: Icons.person_outline,
                     validator: (value) =>

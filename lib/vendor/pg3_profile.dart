@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'DioClient.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'Login_page.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -12,6 +14,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, dynamic>? profileData;
   bool isLoading = true;
   final DioClient _dioClient = DioClient();
+  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
   @override
   void initState() {
@@ -33,6 +36,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
         isLoading = false;
       });
       print('Error: $e');
+    }
+  }
+
+  Future<void> _signOut() async {
+    try {
+      // Delete the token from secure storage
+      await _secureStorage.delete(key: 'token');
+
+      // Navigate to login page
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginPage()),
+        );
+      }
+    } catch (e) {
+      print('Error signing out: $e');
     }
   }
 
@@ -141,9 +161,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               'Sign Out',
                               'Log out from your account',
                               isAction: true,
-                              onTap: () {
-                                // TODO: Implement sign out
-                              },
+                              onTap: _signOut,
                             ),
                           ],
                         ),

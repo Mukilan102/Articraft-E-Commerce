@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert'; // For JSON encoding/decoding
 import 'Productmodel.dart';
 import 'UserDioClient.dart';
+import 'package:articraft_ui/Customer/AR.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String productId;
@@ -323,6 +324,35 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         ),
                                       ),
                                     ],
+                                  ),
+                                ),
+                                SizedBox(height: 16),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ARViewScreen(
+                                            productId: widget.productId),
+                                      ),
+                                    );
+                                  },
+                                  icon: Icon(Icons.view_in_ar,
+                                      color: Colors.white),
+                                  label: Text(
+                                    "View in AR",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.deepPurple,
+                                    padding: EdgeInsets.symmetric(vertical: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
                                   ),
                                 ),
                                 SizedBox(height: 30),
